@@ -13,9 +13,16 @@ MAX_Y_COORDINATE = 779
 
 class TekPath:
     def __init__(self, coordinates):
-        self.coordinates = [
-            (coordinate[0], coordinate[1]) for coordinate in coordinates
-        ]
+        self.coordinates = []
+        previous = coordinates[0]
+        self.coordinates.append(coordinates[0])
+        for coordinate in coordinates[1:]:
+            if coordinate != previous:
+                self.coordinates.append(coordinate)
+            previous = coordinate
+
+    def vector_mode_checkout_coordinates(self):
+        return self.coordinates
 
     def bbox(self):
         return (
@@ -50,7 +57,7 @@ class TekPath:
 
 
 class TekShape:
-    def __init__(self, svg_file):
+    def __init__(self, svg_paths):
 
         def flip_y(coordinates):
             return [(coordinate[0], MAX_Y_COORDINATE - coordinate[1]) for coordinate in coordinates]
@@ -67,18 +74,22 @@ class TekShape:
             return svg_points_to_coordinates(bezier_to_svg_points(bezier, num_samples))
 
         self.paths = []
-        svg_paths, attributes = svgpathtools.svg2paths(svg_file)
         for svg_path in svg_paths:
+            coordinates = []
             for segment in svg_path:
                 if isinstance(segment, svgpathtools.path.Line):
-                    self.paths.append(TekPath(flip_y([
+                    coordinates.extend([
                          (segment.start.real, segment.start.imag),
                          (segment.end.real, segment.end.imag)
-                    ])))
+                    ])
                 elif isinstance(segment, svgpathtools.path.CubicBezier):
-                    self.paths.append(TekPath(flip_y(bezier_to_coordinates(segment))))
+                    coordinates.extend(bezier_to_coordinates(segment))
                 else:
                     raise ValueError(f"Unsupported path type: {type(segment)}")
+            if coordinates:
+                if self.paths and self.paths[-1].coordinates[-1] == flip_y([coordinates[0]])[0]:
+                    coordinates = coordinates[1:]
+                self.paths.append(TekPath(flip_y(coordinates)))
 
     def fit(self):
         def offset_to_center(bbox):
@@ -113,8 +124,8 @@ class TekShape:
 
 
 if __name__ == "__main__":
-    input_svg = 'input.svg'
-    shape = TekShape(input_svg)
-    shape.fit()
+    svg_file = 'input.svg'
+    svg_paths, _attributes = svgpathtools.svg2paths(svg_file)
+    shape = TekShape(svg_paths)
     with open('input.tek', 'w') as f:
-        f.write(str(shape))
+        f.write(str(shape.fit()))
