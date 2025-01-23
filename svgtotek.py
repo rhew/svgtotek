@@ -26,18 +26,16 @@ class TekPath:
         )
 
     def scale(self, factor):
-        self.coordinates = [
+        return TekPath([
             (coordinate[0] * factor, coordinate[1] * factor)
             for coordinate in self.coordinates
-        ]
-        return self
+        ])
 
     def offset(self, offset):
-        self.coordinates = [
+        return TekPath([
             (coordinate[0] + offset[0], coordinate[1] + offset[1])
             for coordinate in self.coordinates
-        ]
-        return self
+        ])
 
     def __str__(self):
         tek_string = ""

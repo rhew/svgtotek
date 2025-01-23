@@ -11,3 +11,15 @@ class TestTekPath(unittest.TestCase):
             str(self.BORDER),
             ' ` @8k @8k?_ `?_'
         )
+
+    def test_scale(self):
+        self.assertEqual(
+            str(self.BORDER.scale(0.5)),
+            ' ` @,e @,e/_ `/_'
+        )
+
+    def test_offset(self):
+        self.assertEqual(
+            str(self.BORDER.scale(0.5).offset((75, -10))),
+            '?v"K+{"K+{2J?v2J'
+        )
