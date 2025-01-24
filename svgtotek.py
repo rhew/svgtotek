@@ -2,6 +2,8 @@
 Converts SVG paths to Tektronix 4010-compatible instructions.
 This was helpful: https://vt100.net/docs/vt3xx-gp/chapter13.html
 """
+import sys
+
 import svgpathtools
 
 MARGIN = 10
@@ -124,8 +126,12 @@ class TekShape:
 
 
 if __name__ == "__main__":
-    svg_file = 'input.svg'
+    if len(sys.argv) < 2:
+        print(f"Usage: {0} <input svg file> <output tektronix 4010 file>")
+        sys.exit(1)
+    svg_file = sys.argv[1]
+    tek_file = sys.argv[2]
     svg_paths, _attributes = svgpathtools.svg2paths(svg_file)
     shape = TekShape(svg_paths)
-    with open('input.tek', 'w') as f:
+    with open(tek_file, 'w') as f:
         f.write(str(shape.fit()))
