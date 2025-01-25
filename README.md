@@ -1,12 +1,29 @@
 # SVG to Tektronix 4010
 
-## Quick Start
+## Draw on an ADM-3A with an RG-512
 
+Prepare a Linux host for attachment
 ```
+stty -F /dev/ttyUSB0 9600 cs8 -cstopb -parenb -ixon
+sudo agetty -L ttyUSB0 9600 adm3a
+```
+
+And Run from the ADM-3A
+```
+./svgtotek.py input.svg -d -t 30
+```
+
+## Convert SVG to Tektronix 4010 characters
+```
+source venv/bin/activate
+./svgtotek.py input.svg -o output.tek
+```
+
+---
+
+## Simplify SVG Files if necessary
+
 inkscape input.svg --batch-process --actions='EditSelectAll;SelectionSimplify;FileSave;FileClose'
-
-python svgtotek.py input.svg input.tek
-```
 
 ## Resolution
 
