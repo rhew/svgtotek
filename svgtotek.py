@@ -57,21 +57,16 @@ class TekShape:
 
         self.paths = []
         for svg_path in svg_paths:
-            coordinates = []
             for segment in svg_path:
                 if isinstance(segment, svgpathtools.path.Line):
-                    coordinates.extend([
-                         (segment.start.real, segment.start.imag),
-                         (segment.end.real, segment.end.imag)
-                    ])
+                    self.paths.append(TekPath(
+                        flip_y([(segment.start.real, segment.start.imag),
+                                (segment.end.real, segment.end.imag)
+                                ])))
                 elif isinstance(segment, svgpathtools.path.CubicBezier):
-                    coordinates.extend(bezier_to_coordinates(segment))
+                    self.paths.append(TekPath(flip_y(bezier_to_coordinates(segment))))
                 else:
                     raise ValueError(f"Unsupported path type: {type(segment)}")
-            if coordinates:
-                if self.paths and self.paths[-1].coordinates[-1] == flip_y([coordinates[0]])[0]:
-                    coordinates = coordinates[1:]
-                self.paths.append(TekPath(flip_y(coordinates)))
 
     def __str__(self):
         tek_string = ""
