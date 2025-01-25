@@ -70,8 +70,13 @@ class TekShape:
 
     def __str__(self):
         tek_string = ""
+        last_coordinate = None
         for path in self.paths:
-            tek_string += GS + str(path)
+            if path.coordinates[0] == last_coordinate:
+                tek_string += str(TekPath(path.coordinates[1:]))
+            else:
+                tek_string += GS + str(path)
+            last_coordinate = path.coordinates[-1]
         return tek_string
 
 
