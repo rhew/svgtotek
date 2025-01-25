@@ -80,17 +80,17 @@ class TekShape:
         return tek_string
 
 
+# svgpathtools uses (min_x, max_x, min_y, max_y)
+def max_bounding(tuples):
+    return (
+        min([t[0] for t in tuples]),
+        max([t[1] for t in tuples]),
+        min([t[2] for t in tuples]),
+        max([t[3] for t in tuples]),
+    )
+
+
 def fit(paths, svg_min, svg_max):
-
-    # svgpathtools uses (min_x, max_x, min_y, max_y)
-    def max_bounding(tuples):
-        return (
-            min([t[0] for t in tuples]),
-            max([t[1] for t in tuples]),
-            min([t[2] for t in tuples]),
-            max([t[3] for t in tuples]),
-        )
-
     shape_bbox = max_bounding([path.bbox() for path in paths])
     scale = min(
         (svg_max.real - svg_min.real) / (shape_bbox[1] - shape_bbox[0]),
@@ -113,7 +113,7 @@ def write_tek_file(filename, svg_paths):
         f.write(str(TekShape(svg_paths)))
 
 
-def display_to_terminal(svg_paths, display_time=2):
+def draw_on_terminal(svg_paths, display_time=2):
     GS = chr(0x1d)
     US = chr(0x1f)
     CAN = chr(0x18)
@@ -128,16 +128,47 @@ def display_to_terminal(svg_paths, display_time=2):
     os.system('clear')
 
 
+def pretty_bounding(bounding_box):
+    return (
+        f"({int(bounding_box[0])}, {int(bounding_box[1])}), " +
+        f"({int(bounding_box[2])}, {int(bounding_box[3])})"
+    )
+
+
+def display_info(svg_paths):
+    print(f"This shape has {len(svg_paths)} paths.")
+    print("overall bounding box: " +
+          f"{pretty_bounding(max_bounding([path.bbox() for path in svg_paths]))}")
+    for path in svg_paths:
+        print(f"path with bounding box: {pretty_bounding(path.bbox())} has {len(path)} segments")
+        print(f"  Lines: {len([s for s in path if isinstance(s, svgpathtools.Line)])}")
+        print(f"  CubicBezier: {len([s for s in path if isinstance(s, svgpathtools.CubicBezier)])}")
+        print(f"  Arc: {len([s for s in path if isinstance(s, svgpathtools.Arc)])}")
+        print("  QuadraticBezier: " + str(len([
+            s for s in path if isinstance(s, svgpathtools.QuadraticBezier)
+        ])))
+        print("  other: " + str(len([
+            s for s in path if not isinstance(s, (
+                svgpathtools.Line,
+                svgpathtools.CubicBezier,
+                svgpathtools.Arc,
+                svgpathtools.QuadraticBezier
+            ))])))
+
+
 @click.command()
 @click.argument('svg_file')
+@click.option('--info', '-i', help='Display SVG info', is_flag=True, default=False)
 @click.option('--output', '-o', help='Output to file')
 @click.option('--display', '-d', help='Display to Tektronix', is_flag=True, default=False)
 @click.option('--time', '-t', help='Time to display', default=2)
-def main(svg_file, output, display, time):
+def main(svg_file, info, output, display, time):
     svg_paths, _attributes = svgpathtools.svg2paths(svg_file)
     fitted = fit(svg_paths, complex(0, 0), complex(MAX_X_COORDINATE, MAX_Y_COORDINATE))
+    if info:
+        display_info(fitted)
     if display:
-        display_to_terminal(fitted, display_time=time)
+        draw_on_terminal(fitted, display_time=time)
     if output:
         write_tek_file(output, fitted)
 

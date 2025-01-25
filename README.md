@@ -21,11 +21,11 @@ source venv/bin/activate
 
 ---
 
-## Simplify SVG Files if necessary
+## Simplify SVG files if necessary before rendering to Tektronix format
 
 inkscape input.svg --batch-process --actions='EditSelectAll;SelectionSimplify;FileSave;FileClose'
 
-## Resolution
+## About Resolution
 
 From RETRO-GRAPHIX Users Manual:
 
@@ -36,7 +36,7 @@ From RETRO-GRAPHIX Users Manual:
 
 From example, 0 based. 0-1023; 0-779
 
-## Encoding
+## About Encoding
 
 - https://vt100.net/docs/vt3xx-gp/chapter13.html
 - https://bitsavers.org/pdf/tektronix/401x/070-1225-00_4010um_Jul81.pdf
